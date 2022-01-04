@@ -1,5 +1,5 @@
 <template>
-  <div class="about">
+  <div class="common-box">
     <section class="todoapp">
       <header class="header">
         <h1>todos</h1>
@@ -54,7 +54,7 @@
 </template>
 <script lang="ts">
 import filtersFun from './todoFilters'
-import todoStorageFun from './todoStorage'
+import { todoType, todoStorageFun } from './todoStorage'
 import { defineComponent, onMounted, reactive, computed, watch } from 'vue'
 
 export default defineComponent({
@@ -77,13 +77,13 @@ export default defineComponent({
     const state = reactive({
       todos: todoStorage.fetch(),
       newTodo: '',
-      editedTodo: null,
+      editedTodo: {},
       visibility: 'all',
       beforeEditCache: ''
     })
-    const filters = filtersFun(state.todos)
+    const filters = filtersFun()
     // watch todos change for localStorage persistence
-    watch(() => state.todos, (todos, prevTodos) => { todoStorage.save(todos) }, { deep: true })
+    watch(() => state.todos, (todos, prevTodos) => { todoStorage.save(todos); console.log('prevTodos ', prevTodos) }, { deep: true })
 
     // methods that implement data logic.
     // note there's no DOM manipulation here at all.
@@ -96,28 +96,28 @@ export default defineComponent({
         id: todoStorage.uid.value++,
         title: value,
         completed: false
-      })
+      } as todoType)
       state.newTodo = ''
     }
-    const removeTodo = (todo) => {
+    const removeTodo = (todo : todoType) => {
       state.todos.splice(state.todos.indexOf(todo), 1)
     }
-    const editTodo = (todo) => {
+    const editTodo = (todo: todoType) => {
       //  state.beforeEditCache = todo.title
       state.editedTodo = todo
     }
-    const doneEdit = (todo) => {
+    const doneEdit = (todo: todoType) => {
       if (!state.editedTodo) {
         return
       }
-      state.editedTodo = null
+      state.editedTodo = {}
       todo.title = todo.title.trim()
       if (!todo.title) {
         removeTodo(todo)
       }
     }
-    const cancelEdit = (todo) => {
-      state.editedTodo = null
+    const cancelEdit = (todo: todoType) => {
+      state.editedTodo = {}
       todo.title = state.beforeEditCache
     }
     const removeCompleted = () => {
@@ -130,32 +130,39 @@ export default defineComponent({
 
     // computed properties
     // https://v3.cn.vuejs.org/api/computed-watch-api.html
-    const filteredTodos = computed(() => filters[state.visibility](state.todos))
+    // const filteredTodos = computed(() => filters[state.visibility<string>](state.todos))
+    const filteredTodos = computed(() => {
+      if (state.visibility === 'all' || state.visibility === 'active' || state.visibility === 'completed') {
+        return filters[state.visibility](state.todos)
+      } else {
+        return filters.all(state.todos)
+      }
+    })
     const remaining = computed(() => filters.active(state.todos).length)
 
     const allDone = computed({
       get: () => remaining.value === 0,
       set: value => {
-        state.todos.forEach(function (todo) {
+        state.todos.forEach(function (todo: todoType) {
           todo.completed = value
         })
       }
     })
 
     //  替代原 onHashChange
-    const changeVisibility = (status) => {
+    const changeVisibility = (status:string) => {
       state.visibility = status
     }
     // handle routing
-    function onHashChange () {
-      var visibility = window.location.hash.replace(/#\/?/, '')
-      if (filters[visibility]) {
-        state.visibility = visibility
-      } else {
-        window.location.hash = 'todo'
-        state.visibility = 'all'
-      }
-    }
+    // function onHashChange () {
+    //   var visibility = window.location.hash.replace(/#\/?/, '')
+    //   if (filters[visibility]) {
+    //     state.visibility = visibility
+    //   } else {
+    //     window.location.hash = 'todo'
+    //     state.visibility = 'all'
+    //   }
+    // }
 
     onMounted(() => {
       // window.addEventListener('hashchange', onHashChange)

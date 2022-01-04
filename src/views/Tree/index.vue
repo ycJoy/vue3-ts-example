@@ -1,5 +1,5 @@
 <template>
-  <div class="about">
+  <div class="common-box">
     <h3>Vue3 TypeScript tree view example</h3>
     <ul id="demo">
       <TreeItem

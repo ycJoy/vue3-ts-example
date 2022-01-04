@@ -1,15 +1,22 @@
 // visibility filters
-export default function filters () {
-  const all = (todos) => {
+import { todoType } from './todoStorage'
+export interface filtersType {
+  all: (todos:todoType[]) => todoType[];
+  active: (todos:todoType[]) => todoType[];
+  completed: (todos:todoType[]) => todoType[];
+}
+
+export default function filters ():filtersType {
+  const all = (todos:todoType[]) => {
     return todos
   }
-  const active = (todos) => {
-    return todos.filter((todo) => {
+  const active = (todos:todoType[]) => {
+    return todos.filter((todo:todoType) => {
       return !todo.completed
     })
   }
-  const completed = (todos) => {
-    return todos.filter((todo) => {
+  const completed = (todos:todoType[]) => {
+    return todos.filter((todo:todoType) => {
       return todo.completed
     })
   }

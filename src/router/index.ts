@@ -24,6 +24,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/todo',
     name: 'TodoMvc',
     component: () => import(/* webpackChunkName: "TodoMVC" */ '../views/TodoMvc/index.vue')
+  },
+  {
+    path: '/vantTest',
+    name: 'VantTest',
+    component: () => import(/* webpackChunkName: "TodoMVC" */ '../views/VantTest/index.vue')
   }
 ]
 
